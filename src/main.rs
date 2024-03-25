@@ -32,23 +32,26 @@ fn main() {
 
 fn read_command(command: &str, file: &str) {
     match command {
-        "search" => search_file(file),
+        "search" => match read_file(file) {
+                Some(str) => search_for_flag(str),
+                None => println!("File failed to read"),
+            },
         _ => println!("Command not recognized: {command}")
     }
 }
 
 fn open_file(file_to_open: &str) -> File {OpenOptions::new().read(true).open(file_to_open).unwrap()}
 
-fn search_file(file_to_search: &str) {
+fn read_file(file_to_search: &str) -> Option<String> {
     let file = open_file(file_to_search);
     let mut output_string: String = "".to_string();
-    match BufReader::new(file).read_to_string(&mut output_string) {
-        Ok(_) => read_string(output_string),
-        Err(_) => return println!("Failed to read file")
+    return match BufReader::new(file).read_to_string(&mut output_string) {
+        Ok(_) => Some(output_string),
+        Err(_) => None,
     }
 }
 
-fn read_string(output_string: String) {
+fn search_for_flag(output_string: String) {
     let first_index = match output_string.find("flag{") {
         Some(i) => i,
         None => return println!("No flag found"),
